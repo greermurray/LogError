@@ -58,7 +58,7 @@ func LogError(mensaje string, enviarNotificacion bool, error error) bool {
 		go func() {
 			aplicacion := viper.GetString("aplicacion")
 
-			_, fichero, linea, _ := runtime.Caller(1)
+			_, fichero, linea, _ := runtime.Caller(0)
 
 			var cantidadDivisiones int
 			ficheroFinal := strings.Split(fichero, "/")

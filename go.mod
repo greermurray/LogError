@@ -2,7 +2,11 @@ module github.com/rodelag/logerror
 
 go 1.19
 
-require github.com/spf13/viper v1.14.0
+require (
+	github.com/go-errors/errors v1.4.2
+	github.com/pkg/errors v0.9.1
+	github.com/spf13/viper v1.14.0
+)
 
 require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
