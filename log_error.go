@@ -69,14 +69,14 @@ func LogError(mensaje string, enviarNotificacion bool, error error) bool {
 				cantidadDivisiones = cantidad
 			}
 
-			mensaje = fmt.Sprintf("[APP]: %s [FICHERO/LÍNEA]: (%s:%d) [MENSAJE]: %s [ERROR]: %s", aplicacion, ficheroFinal[cantidadDivisiones], linea, mensaje, error)
+			mensajeFormato := fmt.Sprintf("[APP]: %s [FICHERO/LÍNEA]: (%s:%d) [MENSAJE]: %s [ERROR]: %s", aplicacion, ficheroFinal[cantidadDivisiones], linea, mensaje, error)
 
-			log.Printf(mensaje)
+			log.Printf(mensajeFormato)
 
 			go registrarError(aplicacion, fmt.Sprintf("%s:%d", ficheroFinal[cantidadDivisiones], linea), mensaje, error.Error())
 
 			if enviarNotificacion {
-				go Notificacion(mensaje, error)
+				go Notificacion(mensajeFormato, error)
 			}
 		}()
 		return true
