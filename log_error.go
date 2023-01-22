@@ -55,22 +55,22 @@ func registrarError(aplicacion, fichero, mensaje, error string) {
 
 func LogError(mensaje string, enviarNotificacion bool, error error) bool {
 	if error != nil {
+		aplicacion := viper.GetString("aplicacion")
+
+		_, fichero, linea, _ := runtime.Caller(1)
+
+		var cantidadDivisiones int
+		ficheroFinal := strings.Split(fichero, "/")
+
+		if cantidad := len(ficheroFinal); cantidad > 1 {
+			cantidadDivisiones = cantidad - 1
+		} else {
+			cantidadDivisiones = cantidad
+		}
+
+		mensajeFormato := fmt.Sprintf("[APP]: %s [FICHERO/LÍNEA]: (%s:%d) [MENSAJE]: %s [ERROR]: %s", aplicacion, ficheroFinal[cantidadDivisiones], linea, mensaje, error)
+
 		go func() {
-			aplicacion := viper.GetString("aplicacion")
-
-			_, fichero, linea, _ := runtime.Caller(0)
-
-			var cantidadDivisiones int
-			ficheroFinal := strings.Split(fichero, "/")
-
-			if cantidad := len(ficheroFinal); cantidad > 1 {
-				cantidadDivisiones = cantidad - 1
-			} else {
-				cantidadDivisiones = cantidad
-			}
-
-			mensajeFormato := fmt.Sprintf("[APP]: %s [FICHERO/LÍNEA]: (%s:%d) [MENSAJE]: %s [ERROR]: %s", aplicacion, ficheroFinal[cantidadDivisiones], linea, mensaje, error)
-
 			log.Printf(mensajeFormato)
 
 			go registrarError(aplicacion, fmt.Sprintf("%s:%d", ficheroFinal[cantidadDivisiones], linea), mensaje, error.Error())
