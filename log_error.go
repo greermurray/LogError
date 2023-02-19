@@ -68,35 +68,37 @@ func LogError(mensaje string, enviarNotificacion bool, error error) bool {
 			cantidadDivisiones = cantidad
 		}
 
-		mensajeFormato := fmt.Sprintf("[APP]: %s [FICHERO/LÍNEA]: (%s:%d) [MENSAJE]: %s [ERROR]: %s", aplicacion, ficheroFinal[cantidadDivisiones], linea, mensaje, error)
+		go log.Println(fmt.Sprintf("[FICHERO/LÍNEA]: (%s:%d) [MENSAJE]: %s [ERROR]: %s", ficheroFinal[cantidadDivisiones], linea, mensaje, error))
 
-		go func() {
-			log.Printf(mensajeFormato)
+		go registrarError(aplicacion, fmt.Sprintf("%s:%d", ficheroFinal[cantidadDivisiones], linea), mensaje, error.Error())
 
-			go registrarError(aplicacion, fmt.Sprintf("%s:%d", ficheroFinal[cantidadDivisiones], linea), mensaje, error.Error())
+		if enviarNotificacion {
+			mensajeFormato := fmt.Sprintf("[APP]: %s [FICHERO/LÍNEA]: (%s:%d) [MENSAJE]: %s [ERROR]: %s", aplicacion, ficheroFinal[cantidadDivisiones], linea, mensaje, error)
+			go Notificacion(mensajeFormato, error)
+		}
 
-			if enviarNotificacion {
-				go Notificacion(mensajeFormato, error)
-			}
-		}()
 		return true
 	}
 	return false
 }
 
 func Notificacion(mensaje string, error error) {
-	var (
-		servidor = viper.GetString("notificacion.host")
-		puerto   = viper.GetString("notificacion.port")
-		usuario  = viper.GetString("notificacion.user")
-		password = viper.GetString("notificacion.password")
-		correoDe = viper.GetString("notificacion.mail")
-		correoA  = viper.GetString("notificacion.to")
-		asunto   = viper.GetString("notificacion.asunto")
-	)
+	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+	asunto := fmt.Sprintf("Subject: %s\n", viper.GetString("notificacion.asunto"))
+	mensajeFormato := fmt.Sprintf("%s%s\n%s", asunto, mime, fmt.Sprint(mensaje, error))
 
-	msg := fmt.Sprintf("From: %s \n To: %s \n Subject: %s \n\n %s", correoDe, correoA, asunto, fmt.Sprint(mensaje, error))
-	err := smtp.SendMail(fmt.Sprintf("%s:%s", servidor, puerto), smtp.PlainAuth("", usuario, password, servidor), correoDe, []string{correoA}, []byte(msg))
+	auth := smtp.PlainAuth("", viper.GetString("notificacion.user"), viper.GetString("notificacion.password"), viper.GetString("notificacion.host"))
+
+	err := smtp.SendMail(
+		fmt.Sprintf("%s:%s",
+			viper.GetString("notificacion.host"),
+			viper.GetString("notificacion.port"),
+		),
+		auth,
+		viper.GetString("notificacion.mail"),
+		viper.GetStringSlice("notificacion.to"),
+		[]byte(mensajeFormato),
+	)
 
 	LogError("Problemas al enviar la notificación", false, err)
 }
