@@ -13,6 +13,38 @@ notificacion:
     password: ***
     to: ***
     asunto: ***
-centro_errores_endpoint: ***
-centro_errores_token: ***
+centro_errores:
+    ambiente: desarrollo
+    endpoint: ***
+    token: ***
+```
+
+- ##### Si la opción de **"ambiente"** está en: `desarrollo` todos los errores se imprimirán en pantalla.
+
+### Forma de usar la librería sin manejar el error:
+
+```console
+    opcionesDeError := logerror.Opciones{
+        EnviarNotificacion: true,
+        RegistrarEnLaNube:  true,
+    }
+    logerror.LogError("Prueba con librería de registro de errores", errors.New("prueba de error"), opcionesDeError)
+```
+
+### Forma de usar la librería manejando el error:
+
+```console
+    opcionesDeError := logerror.Opciones{
+        EnviarNotificacion: true,
+        RegistrarEnLaNube:  true,
+    }
+    if logerror.LogError("Prueba con librería de registro de errores", errors.New("prueba de error"), opcionesDeError) {
+        //TODO: Hacer algo si pasa algo...
+    }
+```
+
+### Enviar una notificación de error:
+
+```console
+    logerror.Notificacion("Prueba con librería de registro de errores", errors.New("prueba de error"))
 ```
