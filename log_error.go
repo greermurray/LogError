@@ -103,13 +103,15 @@ func LogError(mensaje string, error error, opciones ...Opciones) bool {
 			log.Println(fmt.Sprintf("[FICHERO/LÍNEA]: (%s:%d) [MENSAJE]: %s [ERROR]: %s", ficheroFinal[cantidadDivisiones], linea, mensaje, error))
 		}()
 
-		if opcion.RegistrarEnLaNube == true {
-			go registrarError(aplicacion, fmt.Sprintf("%s:%d", ficheroFinal[cantidadDivisiones], linea), mensaje, error.Error())
-		}
+		if viper.GetString("centro_errores.ambiente") != "desarrollo" {
+			if opcion.RegistrarEnLaNube == true {
+				go registrarError(aplicacion, fmt.Sprintf("%s:%d", ficheroFinal[cantidadDivisiones], linea), mensaje, error.Error())
+			}
 
-		if opcion.EnviarNotificacion == true {
-			mensajeFormato := fmt.Sprintf("[APP]: %s [FICHERO/LÍNEA]: (%s:%d) [MENSAJE]: %s [ERROR]: %s", aplicacion, ficheroFinal[cantidadDivisiones], linea, mensaje, error)
-			go Notificacion(mensajeFormato, error)
+			if opcion.EnviarNotificacion == true {
+				mensajeFormato := fmt.Sprintf("[APP]: %s [FICHERO/LÍNEA]: (%s:%d) [MENSAJE]: %s [ERROR]: %s", aplicacion, ficheroFinal[cantidadDivisiones], linea, mensaje, error)
+				go Notificacion(mensajeFormato, error)
+			}
 		}
 
 		return true
